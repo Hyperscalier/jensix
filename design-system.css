@@ -1,0 +1,377 @@
+/* ══════════════════════════════════════════════
+   JENSIX DESIGN SYSTEM v2
+   Pergament + Tinte + Hatching + Sprechblasen
+   ══════════════════════════════════════════════ */
+
+:root {
+  /* Pergament / Papier */
+  --paper:           #efe2c0;
+  --paper-warm:      #e8d6a8;
+  --paper-shadow:    #c9b582;
+  --paper-deep:      #b39962;
+
+  /* Tinte */
+  --ink:             #1d1208;
+  --ink-soft:        #3a2818;
+  --ink-faded:       #6b513b;
+
+  /* Akzente – kräftige Comic-Farben, leicht entsättigt für Druck-Look */
+  --red:             #b8332a;
+  --red-deep:        #861f1a;
+  --red-light:       #d96150;
+
+  --gold:            #d4a82b;
+  --gold-light:      #f0cf5c;
+  --gold-deep:       #9a7818;
+
+  --blue:            #1f4a73;
+  --blue-mid:        #3a72a3;
+  --blue-light:      #7ba8cf;
+
+  --green:           #4a7a3a;
+  --green-light:     #8ab074;
+
+  --purple:          #5a3a6e;
+
+  /* Schatten – wie Tintenkleckse */
+  --ink-shadow-sm:   3px 3px 0 var(--ink);
+  --ink-shadow:      5px 5px 0 var(--ink);
+  --ink-shadow-lg:   8px 8px 0 var(--ink);
+}
+
+/* ── PERGAMENT-TEXTUR (SVG-Filter, kein externes Asset) ── */
+body {
+  background-color: var(--paper);
+  background-image:
+    /* Fleckiges Papier */
+    radial-gradient(ellipse 800px 400px at 20% 10%, rgba(180,140,80,0.18), transparent 60%),
+    radial-gradient(ellipse 600px 500px at 80% 30%, rgba(160,110,60,0.14), transparent 60%),
+    radial-gradient(ellipse 500px 400px at 30% 80%, rgba(140,100,50,0.16), transparent 60%),
+    radial-gradient(ellipse 700px 300px at 90% 95%, rgba(180,140,80,0.12), transparent 60%),
+    /* Subtile Faserung */
+    repeating-linear-gradient(91deg,
+      transparent 0 23px,
+      rgba(120,80,40,0.025) 23px 24px),
+    repeating-linear-gradient(-2deg,
+      transparent 0 31px,
+      rgba(120,80,40,0.02) 31px 32px);
+  position: relative;
+}
+
+/* Körnung-Layer als SVG-Filter */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.5;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.45  0 0 0 0 0.32  0 0 0 0 0.15  0 0 0 0.18 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  mix-blend-mode: multiply;
+}
+
+/* Rand-Vignettierung wie alter Pergament */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 100% 100% at center,
+      transparent 50%,
+      rgba(80,50,20,0.15) 80%,
+      rgba(80,50,20,0.35) 100%);
+}
+
+/* ══════════════════════════════════════════════
+   TYPOGRAFIE
+   ══════════════════════════════════════════════ */
+body {
+  font-family: 'Caveat Brush', 'Patrick Hand', 'Lora', serif;
+  /* Lora bleibt als Fließtext */
+  font-family: 'Lora', Georgia, serif;
+  color: var(--ink);
+  line-height: 1.7;
+}
+
+.font-display { font-family: 'Cabin Sketch', 'Caveat Brush', sans-serif; font-weight: 700; }
+.font-hand    { font-family: 'Caveat', cursive; }
+.font-body    { font-family: 'Lora', Georgia, serif; }
+.font-mono    { font-family: 'Courier Prime', 'Courier New', monospace; }
+
+/* ══════════════════════════════════════════════
+   PAPIER-PANELS (Karten / Container)
+   ══════════════════════════════════════════════ */
+.paper-panel {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--ink-shadow);
+  position: relative;
+}
+.paper-panel.warm  { background: var(--paper-warm); }
+.paper-panel.lifted{ box-shadow: var(--ink-shadow-lg); }
+
+/* Leicht schiefes Papier (für Effekte) */
+.paper-tilted-l { transform: rotate(-0.6deg); }
+.paper-tilted-r { transform: rotate(0.6deg); }
+
+/* ══════════════════════════════════════════════
+   SCHRAFFUR-FÜLLUNGEN (Comic-Hatching)
+   ══════════════════════════════════════════════ */
+.hatch-diag {
+  background-image: repeating-linear-gradient(45deg,
+    var(--ink) 0 1.5px,
+    transparent 1.5px 6px);
+}
+.hatch-cross {
+  background-image:
+    repeating-linear-gradient(45deg,  var(--ink) 0 1px, transparent 1px 7px),
+    repeating-linear-gradient(-45deg, var(--ink) 0 1px, transparent 1px 7px);
+}
+.hatch-dots {
+  background-image: radial-gradient(var(--ink) 1px, transparent 1.4px);
+  background-size: 8px 8px;
+}
+
+/* ══════════════════════════════════════════════
+   BUTTONS
+   ══════════════════════════════════════════════ */
+.btn {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  padding: 0.55em 1.6em;
+  border: 3px solid var(--ink);
+  box-shadow: var(--ink-shadow-sm);
+  cursor: pointer;
+  transition: transform 0.08s ease, box-shadow 0.08s ease;
+  display: inline-block;
+  position: relative;
+  text-transform: uppercase;
+}
+.btn:hover  { transform: translate(-1px,-1px); box-shadow: 4px 4px 0 var(--ink); }
+.btn:active { transform: translate(2px,2px);   box-shadow: 1px 1px 0 var(--ink); }
+
+.btn-red   { background: var(--red);   color: #fff; }
+.btn-red:hover   { background: var(--red-deep); }
+.btn-gold  { background: var(--gold);  color: var(--ink); }
+.btn-gold:hover  { background: var(--gold-light); }
+.btn-blue  { background: var(--blue);  color: #fff; }
+.btn-blue:hover  { background: var(--blue-mid); }
+.btn-paper { background: var(--paper-warm); color: var(--ink); }
+.btn-paper:hover { background: var(--paper-shadow); }
+
+.btn-sm { font-size: 0.95rem; padding: 0.35em 1em; box-shadow: 2px 2px 0 var(--ink); }
+
+/* Pulse für CTA */
+@keyframes pulse-gold {
+  0%,100% { box-shadow: 3px 3px 0 var(--ink), 0 0 0 0 rgba(212,168,43,0.7); }
+  50%      { box-shadow: 3px 3px 0 var(--ink), 0 0 0 12px rgba(212,168,43,0); }
+}
+.btn-pulse { animation: pulse-gold 1.8s ease-out infinite; }
+
+/* ══════════════════════════════════════════════
+   WAPPEN-HEADER (banner-shape via clip-path)
+   ══════════════════════════════════════════════ */
+.banner {
+  background: var(--red);
+  color: var(--gold-light);
+  padding: 1.4rem 3.5rem 1.6rem;
+  text-align: center;
+  position: relative;
+  border: 3px solid var(--ink);
+  box-shadow: var(--ink-shadow);
+  /* Banner-Schwalbenschwanz an den Seiten */
+  clip-path: polygon(
+    0 0, 100% 0,
+    100% calc(100% - 18px), calc(100% - 22px) 100%,
+    22px 100%, 0 calc(100% - 18px)
+  );
+}
+.banner h1, .banner h2 {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-shadow:
+    2px 2px 0 var(--red-deep),
+    3px 3px 0 var(--ink);
+}
+.banner h1 { font-size: clamp(2rem, 5.5vw, 3.4rem); line-height: 1.05; }
+.banner h2 { font-size: clamp(1.5rem, 3.5vw, 2.1rem); line-height: 1.1; }
+.banner .subtitle {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  color: rgba(255,235,180,0.95);
+  font-style: italic;
+  margin-top: 0.2rem;
+  letter-spacing: 0.02em;
+  text-shadow: none;
+}
+
+/* Goldener Streifen unter dem Banner */
+.banner-strip {
+  height: 14px;
+  background:
+    repeating-linear-gradient(45deg,
+      var(--gold) 0 8px,
+      var(--gold-deep) 8px 9px,
+      var(--gold) 9px 17px,
+      var(--ink) 17px 18px);
+  border-left: 3px solid var(--ink);
+  border-right: 3px solid var(--ink);
+}
+
+/* ══════════════════════════════════════════════
+   SPRECHBLASEN (für Charakter-Dialoge)
+   ══════════════════════════════════════════════ */
+.bubble {
+  position: relative;
+  background: #fff;
+  border: 3px solid var(--ink);
+  border-radius: 18px;
+  padding: 1rem 1.3rem;
+  box-shadow: var(--ink-shadow-sm);
+  font-family: 'Lora', serif;
+  line-height: 1.55;
+}
+.bubble::before, .bubble::after {
+  content: '';
+  position: absolute;
+  width: 0; height: 0;
+}
+/* Tail unten links – zeigt zum Charakter */
+.bubble.tail-bl::before {
+  bottom: -22px; left: 28px;
+  border: 12px solid transparent;
+  border-top-color: var(--ink);
+  border-right: 0;
+}
+.bubble.tail-bl::after {
+  bottom: -16px; left: 32px;
+  border: 9px solid transparent;
+  border-top-color: #fff;
+  border-right: 0;
+}
+.bubble.warm { background: var(--paper-warm); }
+.bubble.warm.tail-bl::after { border-top-color: var(--paper-warm); }
+
+/* Charakter-Reihe: Avatar links, Bubble rechts */
+.dialog-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  margin: 1.2rem 0;
+}
+.dialog-row .char-avatar {
+  flex-shrink: 0;
+  width: 88px; height: 88px;
+}
+.dialog-row .bubble { flex: 1; }
+.dialog-row .char-name {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: 0.03em;
+  margin-bottom: 0.15rem;
+  display: inline-block;
+  font-size: 1.05rem;
+}
+
+/* ══════════════════════════════════════════════
+   TINTENKLECKSE (decorative)
+   ══════════════════════════════════════════════ */
+.ink-blot {
+  position: absolute;
+  pointer-events: none;
+  opacity: 0.18;
+  z-index: 0;
+}
+
+/* ══════════════════════════════════════════════
+   PROGRESS BAR (komplett neu)
+   ══════════════════════════════════════════════ */
+#progress-wrap {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  height: 28px;
+  background: var(--paper-warm);
+  border-bottom: 3px solid var(--ink);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  padding: 0 14px;
+  gap: 10px;
+  font-family: 'Cabin Sketch', cursive;
+  font-size: 0.9rem;
+  letter-spacing: 0.05em;
+  box-shadow: 0 3px 0 var(--ink);
+}
+#progress-wrap.show { display: flex; }
+#progress-track {
+  flex: 1;
+  height: 12px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+#progress-fill {
+  height: 100%;
+  background: repeating-linear-gradient(45deg,
+    var(--red) 0 6px,
+    var(--red-deep) 6px 7px,
+    var(--red) 7px 13px,
+    var(--gold) 13px 14px);
+  width: 0%;
+  transition: width 0.7s cubic-bezier(.5,1.5,.5,1);
+}
+.progress-step {
+  font-size: 0.85rem;
+  color: var(--ink);
+}
+
+/* ══════════════════════════════════════════════
+   SCREEN TRANSITIONS
+   ══════════════════════════════════════════════ */
+.screen {
+  display: none;
+  flex-direction: column;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.screen.active  { display: flex; }
+.screen.visible { opacity: 1; transform: translateY(0); }
+
+/* ══════════════════════════════════════════════
+   UTILITY
+   ══════════════════════════════════════════════ */
+.center-screen {
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1.5rem;
+}
+.task-screen {
+  align-items: center;
+  padding: 3rem 1rem 4rem;
+}
+.task-wrapper { max-width: 1100px; width: 100%; }
+.task-body {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-top: none;
+  box-shadow: var(--ink-shadow);
+  padding: 2rem 2rem;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-track { background: var(--paper-warm); }
+::-webkit-scrollbar-thumb {
+  background: var(--ink); border: 2px solid var(--paper-warm);
+}

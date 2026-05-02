@@ -1,0 +1,696 @@
+/* ══════════════════════════════════════════════
+   SCREEN-SPEZIFISCHE STYLES
+   ══════════════════════════════════════════════ */
+
+/* ── INTRO ──────────────────────────────────── */
+.intro-wrapper {
+  max-width: 820px;
+  width: 100%;
+  position: relative;
+}
+.intro-text-box {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  border-top: none;
+  box-shadow: var(--ink-shadow);
+  padding: 2.4rem 2.8rem 2.6rem;
+  position: relative;
+}
+.intro-paragraph {
+  font-size: 1.08rem;
+  line-height: 1.85;
+  color: var(--ink);
+  margin-bottom: 1.3rem;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.intro-paragraph.revealed { opacity: 1; transform: translateY(0); }
+.intro-paragraph strong { font-weight: 700; }
+.intro-paragraph.big-quote {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: clamp(1.3rem, 2.6vw, 1.65rem);
+  letter-spacing: 0.01em;
+  color: var(--ink);
+  line-height: 1.45;
+  border-left: 5px solid var(--red);
+  padding-left: 1.2rem;
+  font-style: normal;
+}
+.intro-paragraph.callout {
+  border: 3px solid var(--ink);
+  background: var(--paper-warm);
+  padding: 1rem 1.3rem;
+  position: relative;
+}
+.intro-paragraph.callout::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px dashed var(--ink-faded);
+  pointer-events: none;
+}
+.intro-btn-wrap {
+  text-align: center;
+  margin-top: 2.2rem;
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity 0.6s ease 0.3s, transform 0.6s ease 0.3s;
+}
+.intro-btn-wrap.revealed { opacity: 1; transform: translateY(0); }
+
+/* Decorative ink blots */
+.intro-wrapper .ink-blot.tl { top: -20px; left: -30px; width: 80px; height: 80px; }
+.intro-wrapper .ink-blot.br { bottom: -10px; right: -20px; width: 60px; height: 60px; }
+
+/* ── TASK HEADERS (banner-shape) ──────────────── */
+.task-banner-wrap {
+  position: relative;
+  padding-top: 0.5rem;
+}
+.task-banner {
+  background: var(--red);
+  color: var(--gold-light);
+  padding: 1.2rem 2.5rem 1.4rem;
+  text-align: center;
+  border: 3px solid var(--ink);
+  position: relative;
+  box-shadow: var(--ink-shadow);
+}
+.task-banner h2 {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: clamp(1.6rem, 3vw, 2.2rem);
+  letter-spacing: 0.04em;
+  text-shadow: 2px 2px 0 var(--red-deep), 3px 3px 0 var(--ink);
+}
+.task-banner p {
+  font-family: 'Caveat', cursive;
+  font-size: 1.25rem;
+  color: rgba(255,235,180,0.95);
+  margin-top: 0.1rem;
+}
+
+/* ── DIALOG-BOX (Charakter spricht) ──────────── */
+.char-dialog {
+  background: var(--paper-warm);
+  border: 3px solid var(--ink);
+  padding: 1.1rem 1.3rem;
+  margin-bottom: 1.6rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  position: relative;
+}
+.char-dialog .avatar {
+  flex-shrink: 0;
+  width: 80px; height: 80px;
+}
+.char-dialog .text {
+  flex: 1;
+  font-size: 0.96rem;
+  line-height: 1.65;
+}
+.char-dialog .name {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  color: var(--red-deep);
+  font-size: 1.1rem;
+  letter-spacing: 0.02em;
+  display: block;
+  margin-bottom: 0.2rem;
+}
+.char-dialog.blue { background: #dde9f4; }
+.char-dialog.gold { background: #f5e6b8; }
+
+/* ── CROSSWORD ───────────────────────────────── */
+.cw-layout {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+.cw-grid-wrap { overflow-x: auto; }
+.cw-grid {
+  display: inline-grid;
+  border: 2px solid var(--ink);
+  background: var(--ink);
+  gap: 1px;
+  line-height: 0;
+  box-shadow: var(--ink-shadow-sm);
+}
+.cw-cell {
+  width: 38px; height: 38px;
+  background: var(--paper);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.1s;
+}
+.cw-cell.black { background: var(--ink); cursor: default; }
+.cw-cell.sel-word { background: #e6d4a4; }
+.cw-cell.sel-cell { background: #f5cf5c; }
+.cw-cell.correct { background: #c8e0a8; }
+.cw-cell.wrong { background: #e8b4a8; }
+.cw-letter {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--ink);
+  pointer-events: none;
+  text-transform: uppercase;
+  line-height: 1;
+}
+.cw-num {
+  position: absolute;
+  top: 1px; left: 2px;
+  font-size: 0.55rem;
+  font-family: 'Lora', serif;
+  color: var(--ink);
+  line-height: 1;
+  pointer-events: none;
+  font-weight: 700;
+}
+#cw-input {
+  position: fixed;
+  opacity: 0;
+  width: 1px; height: 1px;
+  top: 0; left: 0;
+  z-index: -1;
+}
+.cw-clues { min-width: 280px; max-width: 380px; }
+.cw-clues-section { margin-bottom: 1.4rem; }
+.cw-clues h3 {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--red);
+  letter-spacing: 0.04em;
+  border-bottom: 2px solid var(--ink);
+  margin-bottom: 0.5rem;
+  padding-bottom: 0.2rem;
+}
+.cw-clue {
+  display: flex;
+  gap: 0.5rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  transition: background 0.15s;
+  margin-bottom: 0.15rem;
+}
+.cw-clue:hover { background: var(--paper-warm); }
+.cw-clue.active { background: #f5e6b8; border-left: 3px solid var(--red); padding-left: 0.4rem; }
+.cw-clue-num {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  color: var(--red);
+  min-width: 22px;
+  flex-shrink: 0;
+}
+.cw-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.5rem;
+  flex-wrap: wrap;
+}
+.cw-status {
+  font-family: 'Caveat', cursive;
+  font-size: 1.2rem;
+  color: var(--ink-soft);
+}
+
+.rickix-bubble, .cw-success {
+  display: none;
+  margin-top: 1.5rem;
+  padding: 1.1rem 1.3rem 1.1rem 5rem;
+  background: #fff;
+  border: 3px solid var(--ink);
+  box-shadow: var(--ink-shadow-sm);
+  position: relative;
+  font-style: italic;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+.rickix-bubble.show, .cw-success.show { display: block; }
+.rickix-bubble svg, .cw-success svg.avatar-inline {
+  position: absolute;
+  left: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 56px; height: 56px;
+}
+
+.cw-success {
+  background: var(--paper-warm);
+  text-align: left;
+  padding: 1.4rem 1.5rem 1.4rem 7rem;
+  font-style: normal;
+}
+.cw-success svg.avatar-inline { width: 80px; height: 80px; }
+.cw-success h3 {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.7rem;
+  color: var(--red);
+  margin-bottom: 0.4rem;
+}
+.cw-success .actions { margin-top: 1rem; }
+
+/* ── CAESAR ──────────────────────────────────── */
+.encrypted-box {
+  background: var(--paper-warm);
+  border: 3px solid var(--ink);
+  padding: 1.3rem 1.5rem;
+  margin-bottom: 1.8rem;
+  position: relative;
+}
+.encrypted-box::before, .encrypted-box::after {
+  content: '✦';
+  position: absolute;
+  font-size: 1.2rem;
+  color: var(--red);
+  top: -0.4rem;
+}
+.encrypted-box::before { left: 1rem; }
+.encrypted-box::after { right: 1rem; }
+.encrypted-label {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.4rem;
+  color: var(--red);
+  text-transform: uppercase;
+}
+#encryptedText {
+  font-family: 'Courier Prime', monospace;
+  font-size: 1.1rem;
+  letter-spacing: 0.18em;
+  word-break: break-all;
+  line-height: 1.9;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+.riddle-box {
+  background: var(--paper-warm);
+  border: 2px solid var(--ink);
+  padding: 1.2rem 1.4rem;
+  margin-bottom: 1rem;
+  transition: border-color 0.3s, background 0.3s;
+}
+.riddle-box.solved {
+  border-color: var(--green);
+  background: #e8f0d8;
+}
+.riddle-box .riddle-row {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+.riddle-box .scroll-icon { width: 56px; height: 56px; flex-shrink: 0; }
+.riddle-box .riddle-text {
+  font-style: italic;
+  margin-bottom: 0.7rem;
+  line-height: 1.65;
+  font-size: 0.96rem;
+}
+.riddle-box .hint {
+  font-size: 0.88rem;
+  margin-bottom: 0.7rem;
+  color: var(--ink-soft);
+}
+.riddle-controls {
+  display: flex;
+  gap: 0.8rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.riddle-input {
+  width: 80px;
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.4rem;
+  padding: 0.3em 0.5em;
+  border: 3px solid var(--ink);
+  background: var(--paper);
+  text-align: center;
+}
+.riddle-status {
+  font-family: 'Caveat', cursive;
+  font-size: 1.1rem;
+}
+
+#found-numbers {
+  display: none;
+  margin-top: 1rem;
+  background: var(--paper-warm);
+  border: 2px solid var(--ink);
+  padding: 0.8rem 1.2rem;
+}
+#found-numbers .label {
+  font-size: 0.85rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.3rem;
+}
+#found-numbers .nums {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.5rem;
+  letter-spacing: 0.06em;
+}
+
+.slider-box {
+  background: var(--paper-warm);
+  border: 3px solid var(--ink);
+  padding: 1.5rem;
+  margin-bottom: 1.2rem;
+}
+.slider-row {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.slider-label {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.2rem;
+  letter-spacing: 0.04em;
+}
+#caesarSlider {
+  flex: 1;
+  min-width: 180px;
+  accent-color: var(--red);
+  height: 8px;
+}
+#caesarValue {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--red);
+  min-width: 2.5ch;
+  text-align: center;
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  padding: 0.1em 0.4em;
+}
+
+#caesar-result {
+  display: none;
+  border: 2px dashed var(--ink);
+  padding: 1rem;
+  background: var(--paper);
+  min-height: 3rem;
+}
+#caesar-result .label {
+  font-size: 0.8rem;
+  color: var(--ink-soft);
+  margin-bottom: 0.4rem;
+}
+#decryptedText {
+  font-family: 'Courier Prime', monospace;
+  font-size: 1.05rem;
+  letter-spacing: 0.08em;
+  line-height: 1.6;
+}
+
+#caesar-success {
+  display: none;
+  background: var(--paper-warm);
+  border: 3px solid var(--ink);
+  box-shadow: var(--ink-shadow-sm);
+  padding: 1.4rem 1.5rem;
+}
+#caesar-success h3 {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.8rem;
+  color: var(--red);
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+
+/* ── LABYRINTH ───────────────────────────────── */
+.lab-legend {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1.2rem;
+}
+.lab-legend-box {
+  background: var(--paper-warm);
+  border: 2px solid var(--ink);
+  padding: 0.6rem 1rem;
+  font-size: 0.88rem;
+  display: flex;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.lab-legend-item { display: flex; align-items: center; gap: 0.4rem; }
+.lab-legend-item svg { width: 22px; height: 22px; flex-shrink: 0; }
+.lab-status-row {
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  flex-wrap: wrap;
+}
+#lab-status {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.04em;
+  color: var(--red);
+}
+#lab-potion-timer {
+  display: none;
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: var(--blue);
+}
+#labCanvas {
+  border: 3px solid var(--ink);
+  box-shadow: var(--ink-shadow);
+  display: block;
+}
+
+#lab-success {
+  display: none;
+  margin-top: 1.5rem;
+  background: var(--paper-warm);
+  border: 3px solid var(--ink);
+  box-shadow: var(--ink-shadow);
+  padding: 1.5rem;
+}
+#lab-success h3 {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--red);
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+/* ── GUTSCHEIN ───────────────────────────────── */
+#screen-gutschein { padding: 3rem 1rem; align-items: center; justify-content: center; }
+.gutschein-wrap { max-width: 760px; width: 100%; }
+.gutschein-paper {
+  background: var(--paper);
+  border: 3px solid var(--ink);
+  box-shadow: var(--ink-shadow-lg);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.gutschein-banner {
+  background: var(--red);
+  color: var(--gold-light);
+  padding: 1.4rem 2rem;
+  text-align: center;
+  border-bottom: 3px solid var(--ink);
+}
+.gutschein-banner h2 {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 2.4rem;
+  letter-spacing: 0.04em;
+  text-shadow: 2px 2px 0 var(--red-deep), 3px 3px 0 var(--ink);
+  line-height: 1.05;
+}
+.gutschein-banner p {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  margin-top: 0.2rem;
+  color: rgba(255,235,180,0.95);
+}
+.gutschein-body {
+  padding: 2rem 2.2rem 2.2rem;
+}
+.gutschein-amount-row {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 1rem;
+  align-items: center;
+  margin: 1.5rem 0 2rem;
+}
+.amount-card {
+  background: var(--paper-warm);
+  border: 3px solid var(--ink);
+  padding: 1.2rem;
+  text-align: center;
+  position: relative;
+}
+.amount-card .amount-label {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.amount-card .amount-value {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 2.6rem;
+  color: var(--red);
+  line-height: 1.05;
+  margin: 0.3rem 0;
+}
+.amount-card .amount-meta {
+  font-family: 'Caveat', cursive;
+  font-size: 1rem;
+  color: var(--ink-faded);
+  font-style: italic;
+}
+.arrow-divider {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 2rem;
+  color: var(--ink);
+  text-align: center;
+}
+.arrow-divider .arrow-label {
+  font-size: 0.7rem;
+  display: block;
+  letter-spacing: 0.1em;
+  font-family: 'Lora', serif;
+  font-weight: 700;
+  margin-top: -0.3rem;
+}
+
+.price-history {
+  background: var(--paper-warm);
+  border: 3px solid var(--ink);
+  padding: 1.2rem 1.4rem;
+  margin: 1.5rem 0;
+}
+.price-history h3 {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--red);
+  margin-bottom: 0.8rem;
+  text-align: center;
+}
+.price-row {
+  display: grid;
+  grid-template-columns: 80px 1fr auto;
+  gap: 0.8rem;
+  align-items: center;
+  padding: 0.4rem 0;
+  border-bottom: 1px dashed var(--ink-faded);
+  font-size: 0.92rem;
+}
+.price-row:last-child { border-bottom: none; }
+.price-row .year {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  color: var(--blue);
+}
+.price-row .gb {
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  font-size: 1.1rem;
+  text-align: right;
+}
+.price-row.now {
+  background: var(--paper);
+  margin: 0.3rem -0.4rem 0;
+  padding: 0.5rem 0.4rem;
+  border: 2px solid var(--red);
+  border-radius: 2px;
+}
+.price-row.now .gb { color: var(--red); }
+
+.price-bar {
+  height: 12px;
+  background: var(--paper);
+  border: 2px solid var(--ink);
+  position: relative;
+  overflow: hidden;
+}
+.price-bar-fill {
+  height: 100%;
+  background: repeating-linear-gradient(45deg,
+    var(--gold) 0 5px, var(--gold-deep) 5px 6px, var(--gold) 6px 11px);
+}
+
+.gutschein-message {
+  font-family: 'Caveat', cursive;
+  font-size: 1.4rem;
+  text-align: center;
+  line-height: 1.5;
+  margin: 1.5rem 0 0.5rem;
+  color: var(--ink);
+}
+.gutschein-signature {
+  text-align: right;
+  margin-top: 1.2rem;
+  font-family: 'Caveat', cursive;
+  font-size: 1.5rem;
+  color: var(--red-deep);
+  transform: rotate(-2deg);
+}
+.gutschein-stamp {
+  position: absolute;
+  top: 110px; right: 30px;
+  width: 120px; height: 120px;
+  border: 4px solid var(--red);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cabin Sketch', cursive;
+  font-weight: 700;
+  color: var(--red);
+  text-align: center;
+  transform: rotate(-12deg);
+  opacity: 0.85;
+  background: rgba(255,255,255,0.3);
+  pointer-events: none;
+  line-height: 1;
+}
+.gutschein-stamp .big { font-size: 1.4rem; letter-spacing: 0.05em; }
+.gutschein-stamp .sm  { font-size: 0.7rem; letter-spacing: 0.1em; margin-top: 0.2rem; }
+
+/* RESPONSIVE */
+@media (max-width: 800px) {
+  .cw-layout { grid-template-columns: 1fr; }
+  .gutschein-amount-row { grid-template-columns: 1fr; }
+  .arrow-divider { transform: rotate(90deg); }
+  .gutschein-stamp { display: none; }
+}

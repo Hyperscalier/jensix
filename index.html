@@ -7,8 +7,21 @@
 <link href="https://fonts.googleapis.com/css2?family=Cabin+Sketch:wght@400;700&family=Caveat:wght@400;700&family=Caveat+Brush&family=Courier+Prime:wght@400;700&family=Lora:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="design-system.css">
 <link rel="stylesheet" href="screens.css">
+<!-- EmailJS SDK – Zugangsdaten in game.js konfigurieren (EMAILJS_SERVICE_ID etc.) -->
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 </head>
 <body>
+
+<!-- ═══════ MOBILE-WARNUNG (nicht wegklickbar) ═══════ -->
+<div id="mobile-warning">
+  <div class="mobile-warning-box">
+    <svg style="width:90px;height:90px;margin-bottom:1.2rem;" viewBox="0 0 100 100"><use href="#char-jensix"/></svg>
+    <h2>Halt, Jüngeling!</h2>
+    <p>Dieses Abenteuer wurde für den Desktop-Computer erschaffen.</p>
+    <p>Das Labyrinth in Aufgabe III erfordert eine Tastatur – auf dem Mobilgerät funktioniert es leider nicht.</p>
+    <p class="mobile-warning-cta">Bitte öffne die Seite auf einem Computer.</p>
+  </div>
+</div>
 
 <!-- ═══════ Character SVG library (inlined) ═══════ -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -96,12 +109,12 @@
 
     <div class="banner">
       <div style="display:flex;align-items:center;justify-content:center;gap:1.5rem;">
-        <svg style="width:75px;height:75px;flex-shrink:0;" viewBox="0 0 100 100"><use href="#char-jensix"/></svg>
+        <svg style="width:100px;height:100px;flex-shrink:0;" viewBox="0 0 100 100"><use href="#char-jensix"/></svg>
         <div>
           <h1>Jensix und der<br>goldene RAM</h1>
           <div class="subtitle">Ein Geburtstagsabenteuer in drei Prüfungen</div>
         </div>
-        <svg style="width:75px;height:75px;flex-shrink:0;" viewBox="0 0 100 100"><use href="#icon-ram"/></svg>
+        <svg style="width:100px;height:100px;flex-shrink:0;" viewBox="0 0 100 100"><use href="#icon-ram"/></svg>
       </div>
     </div>
     <div class="banner-strip"></div>
@@ -132,6 +145,36 @@
         Aber <strong>Jensix</strong> ist kein normaler Junge. Er will einen neuen Computer mit viel RAM bauen –
         und er braucht <strong>deine Hilfe</strong>, den letzten goldenen RAM-Riegel zu erobern.
       </p>
+
+      <!-- ═══ HELDENVORSTELLUNG ═══ -->
+      <p class="intro-paragraph hero-section-title" id="hero-cards-title">Die Helden des Abenteuers</p>
+      <div class="hero-cards" id="hero-cards">
+        <div class="hero-card">
+          <svg class="hero-avatar" viewBox="0 0 100 100"><use href="#char-jensix"/></svg>
+          <div class="hero-name">Jensix</div>
+          <div class="hero-title">Der Unbeugsame</div>
+          <div class="hero-desc">Will RAM. Bekommt RAM. Koste es, was es wolle.</div>
+        </div>
+        <div class="hero-card">
+          <svg class="hero-avatar" viewBox="0 0 100 100"><use href="#char-ilkara"/></svg>
+          <div class="hero-name">Ilkara</div>
+          <div class="hero-title">Die Kluge</div>
+          <div class="hero-desc">Löst Rätsel, bevor Jensix sie überhaupt liest.</div>
+        </div>
+        <div class="hero-card">
+          <svg class="hero-avatar" viewBox="0 0 100 100"><use href="#char-maxestix"/></svg>
+          <div class="hero-name">Maxestix</div>
+          <div class="hero-title">Das Familienoberhaupt</div>
+          <div class="hero-desc">„Ein neuer Computer? Bei meiner Ruhe! Aber wenn es ihm wichtig ist... dann helft ihm."</div>
+        </div>
+        <div class="hero-card">
+          <svg class="hero-avatar" viewBox="0 0 100 100"><use href="#char-rickix"/></svg>
+          <div class="hero-name">Rickix</div>
+          <div class="hero-title">Der treue Begleiter</div>
+          <div class="hero-desc">Klein, schwarz, tollpatschig – und immer zur Stelle.</div>
+        </div>
+      </div>
+
       <div class="intro-btn-wrap" id="intro-btn">
         <button class="btn btn-red btn-pulse" onclick="startAdventure()">Abenteuer starten!</button>
       </div>
@@ -174,6 +217,7 @@
 
       <div class="cw-controls">
         <button class="btn btn-blue" onclick="checkCrossword()">Antworten prüfen</button>
+        <button class="btn btn-paper btn-sm" id="hint-btn" onclick="giveHint()">💡 Hinweis (3 verbleibend)</button>
         <button class="btn btn-paper btn-sm" onclick="clearCrossword()">Alles löschen</button>
         <span class="cw-status" id="cwStatus"></span>
       </div>
@@ -219,7 +263,9 @@
           <span class="name">Micronikus flüstert</span>
           „Ich habe meinen RAM an die Hyperscalier verkauft – und ich bereue es.
           Ich kann nicht offen reden, also habe ich das Versteck verschlüsselt.
-          Finde die Verschiebungszahl, dann kannst du die Botschaft entschlüsseln."
+          Löst meine drei Rätsel und wendet diese Formel an:
+          <strong>erste Zahl mal zweite Zahl, plus die dritte.</strong>
+          Nur so erhaltet ihr die wahre Verschiebung."
         </div>
       </div>
 
@@ -230,53 +276,113 @@
 
       <div id="phase-riddles">
         <p style="font-family:'Cabin Sketch',cursive;font-weight:700;font-size:1.1rem;margin-bottom:1rem;">
-          Schritt 1 — Zwei Hinweise des Micronikus. Jeder liefert eine Zahl:
+          Schritt 1 — Drei Hinweise des Micronikus. Jeder liefert eine Zahl:
         </p>
 
+        <!-- Rätsel 1 → Antwort: 1 -->
         <div class="riddle-box" id="riddle1-box">
           <div class="riddle-row">
             <svg class="scroll-icon" viewBox="0 0 100 100"><use href="#icon-scroll"/></svg>
             <div style="flex:1;">
               <p class="riddle-text">
                 <strong>Erste Notiz:</strong>
-                „Wenn in Bamberg die Bäume blühen und Jensix endlich Geburtstag hat –
-                in welchem Monat sind wir dann?"
+                „Hätte Miraculix die Stadt der Unbeugsamen einst in ein Tal verzaubert –
+                wie viele ihrer Buchstaben kämen dir fortan doppelt vor?"
               </p>
-              <p class="hint">Welcher Monat ist gemeint? Gib die Monatszahl ein (1–12):</p>
+              <p class="hint">Gib die Zahl ein (0–10):</p>
               <div class="riddle-controls">
-                <input id="riddle1-input" type="number" min="1" max="12" class="riddle-input" placeholder="?">
+                <input id="riddle1-input" type="number" min="0" max="10" class="riddle-input" placeholder="?">
                 <button class="btn btn-blue btn-sm" onclick="checkRiddle1()">Prüfen</button>
                 <span id="riddle1-status" class="riddle-status"></span>
+              </div>
+              <div id="ilkara-hint-1" style="display:none;margin-top:1rem;">
+                <div class="char-dialog blue" style="margin:0;">
+                  <svg class="avatar" viewBox="0 0 100 100"><use href="#char-ilkara"/></svg>
+                  <div class="text">
+                    <span class="name">Ilkara flüstert</span>
+                    „Stell dir vor, die Stadt der Unbeugsamen läge in einem Tal –
+                    sie hiesse dann Bamtal. Was verändert sich – und was bleibt gleich?"
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        <!-- Rätsel 2 → Antwort: 5 -->
         <div class="riddle-box" id="riddle2-box" style="display:none;">
           <div class="riddle-row">
             <svg class="scroll-icon" viewBox="0 0 100 100"><use href="#icon-scroll"/></svg>
             <div style="flex:1;">
               <p class="riddle-text">
                 <strong>Zweite Notiz:</strong>
-                „Rickix hat vier Pfoten und halb so viele Augen.
-                Wie viele Augen hat er?"
+                „Der mächtigste Hyperscalier des fernen Ostens – bekannt für seine kleinen
+                Kommunikationstafeln – speist täglich pünktlich zu Mittag.
+                Wann musst du in Bamberg zum Hörer greifen,
+                um ihn zu diesem Zeitpunkt zu erreichen?"
               </p>
-              <p class="hint">Gib die Anzahl ein:</p>
+              <p class="hint">Gib die Stunde ein (0–23):</p>
               <div class="riddle-controls">
-                <input id="riddle2-input" type="number" min="1" max="5" class="riddle-input" placeholder="?">
+                <input id="riddle2-input" type="number" min="0" max="23" class="riddle-input" placeholder="?">
                 <button class="btn btn-blue btn-sm" onclick="checkRiddle2()">Prüfen</button>
                 <span id="riddle2-status" class="riddle-status"></span>
+              </div>
+              <div id="ilkara-hint-2" style="display:none;margin-top:1rem;">
+                <div class="char-dialog blue" style="margin:0;">
+                  <svg class="avatar" viewBox="0 0 100 100"><use href="#char-ilkara"/></svg>
+                  <div class="text">
+                    <span class="name">Ilkara flüstert</span>
+                    „Der Hyperscalier des fernen Ostens – das ist Samsungus.
+                    Und wenn du ihn zu Mittag erreichen willst,
+                    musst du in Bamberg sehr früh aufstehen. Wie früh?"
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <div id="found-numbers" style="display:none;">
-          <p class="label">Gefundene Zahlen:</p>
+        <!-- Rätsel 3 → Antwort: 2 -->
+        <div class="riddle-box" id="riddle3-box" style="display:none;">
+          <div class="riddle-row">
+            <svg class="scroll-icon" viewBox="0 0 100 100"><use href="#icon-scroll"/></svg>
+            <div style="flex:1;">
+              <p class="riddle-text">
+                <strong>Dritte Notiz:</strong>
+                „Von den drei grossen RAM-Schmieden der Welt hat das schlechte Gewissen
+                nur eine einzige gepackt. Wenn ihr die drei Schmieden in die Ordnung der
+                Gelehrten bringt, an welcher Stelle findet ihr sie dann?"
+              </p>
+              <p class="hint">Gib die Position ein (1–3):</p>
+              <div class="riddle-controls">
+                <input id="riddle3-input" type="number" min="1" max="3" class="riddle-input" placeholder="?">
+                <button class="btn btn-blue btn-sm" onclick="checkRiddle3()">Prüfen</button>
+                <span id="riddle3-status" class="riddle-status"></span>
+              </div>
+              <div id="ilkara-hint-3" style="display:none;margin-top:1rem;">
+                <div class="char-dialog blue" style="margin:0;">
+                  <svg class="avatar" viewBox="0 0 100 100"><use href="#char-ilkara"/></svg>
+                  <div class="text">
+                    <span class="name">Ilkara flüstert</span>
+                    „Die Ordnung der Gelehrten – das ist die Ordnung, die Miraculix auch seinen
+                    Schriftrollen gibt. Fang beim Anfang an."
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="found-numbers" style="display:none!important;">
+          <p class="label">Formel: (erste Zahl × zweite Zahl) + dritte Zahl</p>
           <p class="nums">
-            <span id="found-num1" style="color:var(--red);">–</span>
-            &nbsp;&nbsp;<span style="color:var(--ink-faded);">+</span>&nbsp;&nbsp;
-            <span id="found-num2" style="color:var(--blue);">–</span>
+            (<span id="found-num1" style="color:var(--red);">–</span>
+            &nbsp;×&nbsp;
+            <span id="found-num2" style="color:var(--blue);">–</span>)
+            &nbsp;+&nbsp;
+            <span id="found-num3" style="color:var(--green);">–</span>
+            &nbsp;=&nbsp;
+            <span id="found-result" style="color:var(--ink);font-weight:700;">?</span>
           </p>
         </div>
       </div>
@@ -311,8 +417,8 @@
             <svg class="avatar" viewBox="0 0 100 100"><use href="#char-ilkara"/></svg>
             <div class="text">
               <span class="name">Ilkara erscheint</span>
-              „Jensix! Schau doch mal genau hin – du hast doch schon beide Zahlen gefunden.
-              Was passiert, wenn man sie zusammenzählt?"
+              „Jensix! Die Formel lautet: (erste Zahl × zweite Zahl) + dritte Zahl.
+              Schau nochmals in die gefundenen Zahlen – das Ergebnis ist deine Verschiebung."
             </div>
           </div>
         </div>
@@ -406,83 +512,82 @@
 <div id="screen-gutschein" class="screen" data-screen-label="05 Gutschein">
   <div class="gutschein-wrap">
     <div class="gutschein-paper">
-      <div class="gutschein-banner">
-        <h2>Der goldene RAM</h2>
-        <p>Ein Gutschein, ehrwürdig wie eine Schriftrolle</p>
-      </div>
 
-      <div class="gutschein-body">
-
-        <div class="gutschein-stamp">
-          <div class="big">EINGELÖST<br>VON</div>
-          <div class="sm">JENSIX</div>
-          <div class="big" style="margin-top:0.2rem;">2026</div>
+      <!-- Normal-Zustand -->
+      <div id="gutschein-normal">
+        <div class="gutschein-banner">
+          <h2>Der goldene RAM</h2>
+          <p>Glückwunsch, tapferer Jensix!</p>
         </div>
+        <div class="gutschein-body">
 
-        <div style="display:flex;justify-content:center;margin:0.5rem 0 1rem;">
-          <svg style="width:120px;height:80px;" viewBox="0 0 100 100"><use href="#icon-ram"/></svg>
-        </div>
+          <p style="font-family:'Lora',serif;font-size:1.05rem;line-height:1.85;margin-bottom:1.6rem;">
+            Du hast das Datenlager der Hyperscalier gestürmt, die Wächter umgangen
+            und den goldenen RAM-Riegel in Sicherheit gebracht.
+          </p>
 
-        <p style="text-align:center;font-family:'Caveat',cursive;font-size:1.4rem;line-height:1.4;">
-          Hiermit erhält der tapfere Jensix seinen verdienten RAM
-        </p>
+          <div class="gutschein-angebot">
+            <h3>Gutschein</h3>
+            <p style="font-family:'Lora',serif;font-size:1rem;line-height:1.75;margin-bottom:0.8rem;">
+              Als Zeichen der Anerkennung erhältst du die Möglichkeit, deinen goldenen
+              RAM-Riegel in <strong>100 Gold-Sesterzen</strong> umzutauschen.
+            </p>
+            <p style="font-family:'Caveat',cursive;font-size:1.15rem;color:var(--ink-soft);font-style:italic;">
+              Der Betrag wird innerhalb von 24 Stunden auf das PayPal-Konto von Maxestix überwiesen –
+              wenn er dir wohlgesonnen ist, gibt er ihn dir garantiert weiter.
+            </p>
+          </div>
 
-        <div class="gutschein-amount-row">
-          <div class="amount-card">
-            <div class="amount-label">Wert</div>
-            <div class="amount-value">100</div>
-            <div class="amount-meta">Gold-Sesterzen</div>
+          <div class="gutschein-amount-row">
+            <div class="amount-card">
+              <div class="amount-label">Goldener RAM-Riegel</div>
+              <div style="display:flex;justify-content:center;margin:0.6rem 0;">
+                <svg style="width:80px;height:80px;" viewBox="0 0 100 100"><use href="#icon-ram"/></svg>
+              </div>
+              <div class="amount-meta">Errungen in drei Prüfungen</div>
+            </div>
+            <div class="arrow-divider">
+              ⟶
+              <span class="arrow-label">einlösen</span>
+            </div>
+            <div class="amount-card" style="background:var(--paper);border-color:var(--red);">
+              <div class="amount-label">Gegenwert</div>
+              <div class="amount-value">100</div>
+              <div class="amount-meta">Gold-Sesterzen</div>
+            </div>
           </div>
-          <div class="arrow-divider">
-            ⟶
-            <span class="arrow-label">in RAM</span>
-          </div>
-          <div class="amount-card" style="background:var(--paper);border-color:var(--red);">
-            <div class="amount-label">Heute</div>
-            <div class="amount-value" id="gb-counter">0 GB</div>
-            <div class="amount-meta">DDR5, ungefähr</div>
-          </div>
-        </div>
 
-        <div class="price-history">
-          <h3>Was 100 € früher an RAM gekauft hätten</h3>
+          <div style="text-align:center;margin-top:2rem;">
+            <button class="btn btn-red btn-pulse" onclick="einloesenRam()">
+              Ich möchte den goldenen RAM einlösen →
+            </button>
+          </div>
 
-          <div class="price-row">
-            <span class="year">2010</span>
-            <div class="price-bar"><div class="price-bar-fill" style="width:100%"></div></div>
-            <span class="gb">~50 GB</span>
-          </div>
-          <div class="price-row">
-            <span class="year">2015</span>
-            <div class="price-bar"><div class="price-bar-fill" style="width:60%"></div></div>
-            <span class="gb">~30 GB</span>
-          </div>
-          <div class="price-row">
-            <span class="year">2020</span>
-            <div class="price-bar"><div class="price-bar-fill" style="width:50%"></div></div>
-            <span class="gb">~25 GB</span>
-          </div>
-          <div class="price-row">
-            <span class="year">2024</span>
-            <div class="price-bar"><div class="price-bar-fill" style="width:40%"></div></div>
-            <span class="gb">~20 GB</span>
-          </div>
-          <div class="price-row now">
-            <span class="year">2026</span>
-            <div class="price-bar"><div class="price-bar-fill" style="width:24%"></div></div>
-            <span class="gb">~12 GB</span>
-          </div>
-        </div>
-
-        <p class="gutschein-message">
-          Früher war alles besser – sogar die RAM-Preise.<br>
-          Verfluchte Hyperscalier!
-        </p>
-
-        <div style="text-align:center;margin-top:1.5rem;">
-          <button class="btn btn-paper btn-sm" onclick="showScreen('screen-intro');setProgress(0,'')">↺ Geschichte neu starten</button>
         </div>
       </div>
+
+      <!-- Eingelöst-Zustand (gespeichert via localStorage) -->
+      <div id="gutschein-eingeloest" style="display:none;">
+        <div class="gutschein-banner">
+          <h2>Eingelöst!</h2>
+          <p>Der goldene RAM gehört der Geschichte</p>
+        </div>
+        <div class="gutschein-body gutschein-eingeloest-body">
+          <div class="gutschein-stamp gutschein-stamp-center">
+            <div class="big">EINGELÖST</div>
+            <div class="sm">VON JENSIX</div>
+            <div class="big" style="margin-top:0.2rem;">2026</div>
+          </div>
+          <p style="font-family:'Caveat',cursive;font-size:1.5rem;line-height:1.55;text-align:center;margin-top:1.5rem;">
+            Bravo, Jensix! Der Rätselsteller ist informiert und wird den Betrag
+            innerhalb von 24 Stunden überweisen.
+          </p>
+          <div style="text-align:center;margin-top:2rem;">
+            <button class="btn btn-paper btn-sm" onclick="showScreen('screen-intro');setProgress(0,'')">↺ Geschichte neu starten</button>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </div>

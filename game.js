@@ -1,5 +1,5 @@
 // ══════════════════════════════════════════════════════════════
-//  JENSIX – GAME LOGIC v2
+//  JENSIX – GAME LOGIC v3
 //  Navigation + Crossword + Caesar + Labyrinth + Gutschein
 // ══════════════════════════════════════════════════════════════
 
@@ -51,17 +51,17 @@ function gotoGutschein() {
 //  CROSSWORD
 // ══════════════════════════════════════════════════════════════
 const CW_WORDS = [
-  { answer:'BAMBERG', clue:'Das unbeugsame fränkische Städtchen' },
-  { answer:'RIVELLA', clue:'Jensix\' Zaubertrank – gezähmt durch Milchsäure, sprudelnd aus der Schweiz' },
-  { answer:'GOOGLUS', clue:'Der allwissende Hyperscalier – er kennt jede Antwort, nur nicht, wann genug genug ist' },
-  { answer:'RICKIX',  clue:'Jensix\' kleiner, schwarzer Begleiter' },
-  { answer:'FOHLEN',  clue:'Die Strasse, auf der Jensix wohnt, ist nach ihnen benannt – aber geritten wird hier nicht' },
-  { answer:'FLOETE',  clue:'Troubadix wird grün vor Neid, wenn er Ilkara auf diesem Instrument spielen hört.' },
-  { answer:'LUZERN',  clue:'Von hier kommt der geheimnisvolle Helfer, der Jensix dieses Abenteuer geschickt hat' },
-  { answer:'BLITZ',   clue:'Zuckt an gewissen heissen Sommerabenden über den Himmel und hält Maxestix tagsüber auf Trab.' },
-  { answer:'MAUS',    clue:'Ist kein Tier und isst kein Käse – und trotzdem unverzichtbar auf Jensix\' Schreibtisch' },
-  { answer:'DDR',     clue:'Nein, nicht die Abkürzung aus dem Geschichtsunterricht – sondern das, was Jensix\' RAM noch schneller macht' },
-  { answer:'RAM',     clue:'Die Hyperscalier haben ihn alle – Jensix noch keinen' },
+  { answer:'BAMBERG',  clue:'Das unbeugsame fränkische Städtchen' },
+  { answer:'RIVELLA',  clue:'Jensix\' Zaubertrank – gezähmt durch Milchsäure, sprudelnd aus der Schweiz' },
+  { answer:'GOOGLUS',  clue:'Der allwissende Hyperscalier – er kennt jede Antwort, nur nicht, wann genug genug ist' },
+  { answer:'RICKIX',   clue:'Jensix\' kleiner, schwarzer Begleiter' },
+  { answer:'FOHLEN',   clue:'Die Strasse, auf der Jensix wohnt, ist nach ihnen benannt – aber geritten wird hier nicht' },
+  { answer:'FLOETE',   clue:'Troubadix wird grün vor Neid, wenn er Ilkara auf diesem Instrument spielen hört' },
+  { answer:'LUZERN',   clue:'Von hier kommt der geheimnisvolle Helfer, der Jensix dieses Abenteuer geschickt hat' },
+  { answer:'BLITZ',    clue:'Zuckt an manchen heissen Sommerabenden über den Himmel und hält Maxestix tagsüber auf Trab.' },
+  { answer:'MAUS',     clue:'Ist kein Tier und isst kein Käse – und trotzdem unverzichtbar auf Jensix\' Schreibtisch' },
+  { answer:'DDR',      clue:'Nein, nicht die Abkürzung aus dem Geschichtsunterricht – sondern das, was Jensix\' RAM noch schneller macht' },
+  { answer:'RAM',      clue:'Die Hyperscalier haben ihn alle – Jensix noch keinen' },
 ];
 
 function buildGrid(words) {
@@ -156,6 +156,83 @@ function buildGrid(words) {
 }
 
 let CW=null, cwUser={}, cwSel=null, cwReady=false;
+
+// ── HINT BUTTON ───────────────────────────────────────────────
+let hintCount = 0;
+let hintLockedUntil = 0;
+let hintCountdownInterval = null;
+
+function giveHint() {
+  const now = Date.now();
+  // Check if lock has expired → reset
+  if (hintCount >= 3 && now >= hintLockedUntil) {
+    hintCount = 0;
+    clearInterval(hintCountdownInterval);
+    hintCountdownInterval = null;
+  }
+  // Still locked?
+  if (hintCount >= 3 && now < hintLockedUntil) return;
+  if (!CW) return;
+
+  // Find all cells that are incorrect or empty
+  const candidates = [];
+  for (let r = 0; r < CW.rows; r++) {
+    for (let c = 0; c < CW.cols; c++) {
+      const data = CW.cells[r+','+c];
+      if (!data) continue;
+      if ((cwUser[r+','+c]||'') !== data.letter) {
+        candidates.push({r, c, letter: data.letter});
+      }
+    }
+  }
+  if (candidates.length === 0) return;
+
+  // Pick a random candidate and reveal it
+  const pick = candidates[Math.floor(Math.random() * candidates.length)];
+  cwUser[pick.r+','+pick.c] = pick.letter;
+  updateLetter(pick.r, pick.c);
+  // Mark cell as correct
+  const cell = document.querySelector(`.cw-cell[data-r="${pick.r}"][data-c="${pick.c}"]`);
+  if (cell) cell.classList.add('correct');
+
+  hintCount++;
+  updateHintButton();
+
+  if (hintCount >= 3) {
+    hintLockedUntil = Date.now() + 5 * 60 * 1000;
+    startHintCountdown();
+  }
+}
+
+function updateHintButton() {
+  const btn = document.getElementById('hint-btn');
+  if (!btn) return;
+  if (hintCount >= 3 && Date.now() < hintLockedUntil) {
+    btn.disabled = true;
+  } else {
+    btn.disabled = false;
+    const remaining = 3 - Math.min(hintCount, 3);
+    btn.textContent = `💡 Hinweis (${remaining} verbleibend)`;
+  }
+}
+
+function startHintCountdown() {
+  clearInterval(hintCountdownInterval);
+  hintCountdownInterval = setInterval(() => {
+    const remaining = hintLockedUntil - Date.now();
+    if (remaining <= 0) {
+      clearInterval(hintCountdownInterval);
+      hintCountdownInterval = null;
+      hintCount = 0;
+      updateHintButton();
+      return;
+    }
+    const min = Math.floor(remaining / 60000);
+    const sec = Math.floor((remaining % 60000) / 1000);
+    const btn = document.getElementById('hint-btn');
+    if (btn) btn.textContent = `💡 Gesperrt – noch ${min}:${String(sec).padStart(2,'0')}`;
+  }, 1000);
+}
 
 function initCrossword() {
   if (cwReady) return;
@@ -388,13 +465,19 @@ function checkCrossword() {
 
 // ══════════════════════════════════════════════════════════════
 //  CAESAR
+//  Formel: (Rätsel1 × Rätsel2) + Rätsel3 = (1 × 5) + 2 = 7
 // ══════════════════════════════════════════════════════════════
 const CAESAR_SHIFT = 7;
-const CAESAR_PLAIN = 'NUR WER AM 7. MAI GEBOREN WURDE DARF DEN GOLDENEN RAM BEANSPRUCHEN';
-const RIDDLE1_ANSWER = 5;
-const RIDDLE2_ANSWER = 2;
-let caesarReady=false, riddle1Solved=false, riddle2Solved=false, caesarAttempts=0;
-let num1Found=null, num2Found=null;
+const CAESAR_PLAIN = 'DER GOLDENE RAM LIEGT IM TRESOR DES GALLISCHEN DATENLAGERS HINTER DEM DRITTEN WACHSTEIN';
+const RIDDLE1_ANSWER = 1;   // BAMBERG→BAMTAL: A doppelt → 1
+const RIDDLE2_ANSWER = 5;   // Samsungus (Südkorea) Mittag → 5 Uhr Bamberg
+const RIDDLE3_ANSWER = 2;   // Alphabetisch: Hynixius, Micronikus, Samsungus → Pos. 2
+
+let caesarReady=false;
+let riddle1Solved=false, riddle2Solved=false, riddle3Solved=false;
+let riddle1Attempts=0, riddle2Attempts=0, riddle3Attempts=0;
+let caesarAttempts=0;
+let num1Found=null, num2Found=null, num3Found=null;
 
 function initCaesar() {
   if (caesarReady) return;
@@ -426,10 +509,15 @@ function checkRiddle1() {
       document.getElementById('riddle2-box').scrollIntoView({behavior:'smooth',block:'nearest'});
     }, 500);
   } else {
+    riddle1Attempts++;
     status.textContent='✗ Nicht ganz – überlege nochmal.';
     status.style.color='var(--red)';
+    if (riddle1Attempts >= 2) {
+      document.getElementById('ilkara-hint-1').style.display='block';
+    }
   }
 }
+
 function checkRiddle2() {
   const val=parseInt(document.getElementById('riddle2-input').value);
   const status=document.getElementById('riddle2-status');
@@ -440,16 +528,52 @@ function checkRiddle2() {
     document.getElementById('riddle2-input').disabled=true;
     riddle2Solved=true; num2Found=val;
     updateFoundNumbers();
-    setTimeout(showSlider, 600);
+    setTimeout(()=>{
+      document.getElementById('riddle3-box').style.display='block';
+      document.getElementById('riddle3-box').scrollIntoView({behavior:'smooth',block:'nearest'});
+    }, 500);
   } else {
+    riddle2Attempts++;
     status.textContent='✗ Nicht ganz – überlege nochmal.';
     status.style.color='var(--red)';
+    if (riddle2Attempts >= 2) {
+      document.getElementById('ilkara-hint-2').style.display='block';
+    }
   }
 }
+
+function checkRiddle3() {
+  const val=parseInt(document.getElementById('riddle3-input').value);
+  const status=document.getElementById('riddle3-status');
+  if (val===RIDDLE3_ANSWER) {
+    status.textContent='✓ Richtig!';
+    status.style.color='var(--green)';
+    document.getElementById('riddle3-box').classList.add('solved');
+    document.getElementById('riddle3-input').disabled=true;
+    riddle3Solved=true; num3Found=val;
+    updateFoundNumbers();
+    setTimeout(showSlider, 600);
+  } else {
+    riddle3Attempts++;
+    status.textContent='✗ Nicht ganz – überlege nochmal.';
+    status.style.color='var(--red)';
+    if (riddle3Attempts >= 2) {
+      document.getElementById('ilkara-hint-3').style.display='block';
+    }
+  }
+}
+
 function updateFoundNumbers() {
+  // Formel-Box bleibt ausgeblendet
   if (num1Found!==null) document.getElementById('found-num1').textContent=num1Found;
   if (num2Found!==null) document.getElementById('found-num2').textContent=num2Found;
+  if (num3Found!==null) {
+    document.getElementById('found-num3').textContent=num3Found;
+    const result = (num1Found * num2Found) + num3Found;
+    document.getElementById('found-result').textContent=result;
+  }
 }
+
 function showSlider() {
   document.getElementById('phase-slider').style.display='block';
   document.getElementById('caesarSlider').value=13;
@@ -626,22 +750,18 @@ function onGoalReached() {
   }, 800);
 }
 
-// Helper: draw mini hero sprite (shield-shape body)
 function drawHero(ctx, x, y, size, walkPhase) {
   const bob = Math.sin(walkPhase)*1.5;
   ctx.save();
   ctx.translate(x, y+bob);
-  // Schatten
   ctx.fillStyle='rgba(0,0,0,0.25)';
   ctx.beginPath(); ctx.ellipse(0, size*0.45, size*0.3, size*0.08, 0, 0, Math.PI*2); ctx.fill();
-  // Beine
   const legSwing = Math.sin(walkPhase)*2;
   ctx.fillStyle='#1f4a73'; ctx.strokeStyle='#1d1208'; ctx.lineWidth=1.2;
   ctx.fillRect(-4, size*0.15+legSwing, 3, size*0.25);
   ctx.strokeRect(-4, size*0.15+legSwing, 3, size*0.25);
   ctx.fillRect(1, size*0.15-legSwing, 3, size*0.25);
   ctx.strokeRect(1, size*0.15-legSwing, 3, size*0.25);
-  // Körper (Tunika rot)
   ctx.fillStyle='#b8332a';
   ctx.beginPath();
   ctx.moveTo(-size*0.25, -size*0.05);
@@ -650,13 +770,10 @@ function drawHero(ctx, x, y, size, walkPhase) {
   ctx.lineTo(size*0.25, -size*0.05);
   ctx.closePath();
   ctx.fill(); ctx.stroke();
-  // Gürtel
   ctx.fillStyle='#3a2818';
   ctx.fillRect(-size*0.28, size*0.12, size*0.56, 3);
-  // Kopf
   ctx.fillStyle='#f4d4a8';
   ctx.beginPath(); ctx.ellipse(0, -size*0.18, size*0.18, size*0.2, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-  // Haar (blond)
   ctx.fillStyle=potionActive?'#f0cf5c':'#d4a82b';
   ctx.beginPath();
   ctx.moveTo(-size*0.18, -size*0.22);
@@ -666,11 +783,9 @@ function drawHero(ctx, x, y, size, walkPhase) {
   ctx.quadraticCurveTo(-size*0.1, -size*0.28, -size*0.18, -size*0.22);
   ctx.closePath();
   ctx.fill(); ctx.stroke();
-  // Augen
   ctx.fillStyle='#1d1208';
   ctx.beginPath(); ctx.arc(-size*0.06, -size*0.18, 1, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(size*0.06, -size*0.18, 1, 0, Math.PI*2); ctx.fill();
-  // Glow when potion active
   if (potionActive) {
     ctx.strokeStyle='rgba(240,207,92,0.7)'; ctx.lineWidth=2;
     ctx.beginPath(); ctx.arc(0, 0, size*0.35, 0, Math.PI*2); ctx.stroke();
@@ -678,40 +793,31 @@ function drawHero(ctx, x, y, size, walkPhase) {
   ctx.restore();
 }
 
-// Helper: draw guard
 function drawGuard(ctx, x, y, size, phase) {
   const bob = Math.sin(phase*1.5)*1;
   ctx.save();
   ctx.translate(x, y+bob);
-  // Schatten
   ctx.fillStyle='rgba(0,0,0,0.25)';
   ctx.beginPath(); ctx.ellipse(0, size*0.45, size*0.3, size*0.08, 0, 0, Math.PI*2); ctx.fill();
-  // Beine
   ctx.fillStyle='#3a2818'; ctx.strokeStyle='#1d1208'; ctx.lineWidth=1.2;
   ctx.fillRect(-4, size*0.15, 3, size*0.25);
   ctx.strokeRect(-4, size*0.15, 3, size*0.25);
   ctx.fillRect(1, size*0.15, 3, size*0.25);
   ctx.strokeRect(1, size*0.15, 3, size*0.25);
-  // Körper (Brustpanzer)
   ctx.fillStyle='#6b513b';
   ctx.fillRect(-size*0.28, -size*0.05, size*0.56, size*0.25);
   ctx.strokeRect(-size*0.28, -size*0.05, size*0.56, size*0.25);
-  // Brustpanzer-Highlight
   ctx.fillStyle='#9b8b6b';
   ctx.fillRect(-size*0.2, 0, size*0.4, size*0.15);
   ctx.strokeRect(-size*0.2, 0, size*0.4, size*0.15);
-  // Helm (rot mit dunkler Basis)
   ctx.fillStyle='#3a2818';
   ctx.beginPath(); ctx.ellipse(0, -size*0.2, size*0.22, size*0.2, 0, 0, Math.PI*2); ctx.fill(); ctx.stroke();
-  // Helmkamm
   ctx.fillStyle='#b8332a';
   ctx.fillRect(-size*0.22, -size*0.32, size*0.44, size*0.05);
   ctx.strokeRect(-size*0.22, -size*0.32, size*0.44, size*0.05);
-  // Visier
   ctx.fillStyle='#b8332a';
   ctx.fillRect(-size*0.18, -size*0.18, size*0.36, size*0.05);
   ctx.strokeRect(-size*0.18, -size*0.18, size*0.36, size*0.05);
-  // Augen (weiße Punkte)
   ctx.fillStyle='#fff';
   ctx.beginPath(); ctx.arc(-size*0.08, -size*0.155, 1, 0, Math.PI*2); ctx.fill();
   ctx.beginPath(); ctx.arc(size*0.08, -size*0.155, 1, 0, Math.PI*2); ctx.fill();
@@ -720,28 +826,22 @@ function drawGuard(ctx, x, y, size, phase) {
 
 function drawLab() {
   const ctx=labCtx;
-  // Background gradient (steingrau)
   const g=ctx.createLinearGradient(0,0,0,labCanvas.height);
   g.addColorStop(0,'#2a2a3e'); g.addColorStop(1,'#15152a');
   ctx.fillStyle=g; ctx.fillRect(0,0,labCanvas.width,labCanvas.height);
 
-  // Tiles
   for (let r=0; r<ROWS; r++) for (let c=0; c<COLS; c++) {
     const t=LAB_MAP[r][c];
     const x=c*CELL, y=r*CELL;
     if (t===0) {
-      // Wand – Stein-Pattern
       ctx.fillStyle='#3a3850';
       ctx.fillRect(x, y, CELL, CELL);
-      // Stein-Mortar
       ctx.strokeStyle='#1a1a2a'; ctx.lineWidth=1;
       ctx.strokeRect(x+0.5, y+0.5, CELL-1, CELL-1);
-      // Highlight oben/links
       ctx.fillStyle='rgba(255,255,255,0.04)';
       ctx.fillRect(x, y, CELL, 2);
       ctx.fillRect(x, y, 2, CELL);
     } else if (t===2) {
-      // Start – grünes Tile
       ctx.fillStyle='#4a7a3a';
       ctx.fillRect(x, y, CELL, CELL);
       ctx.fillStyle='#8ab074';
@@ -750,17 +850,14 @@ function drawLab() {
       ctx.font='bold 10px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle';
       ctx.fillText('START', x+CELL/2, y+CELL/2);
     } else if (t===3) {
-      // Ziel – Gold-Tile
       ctx.fillStyle='#d4a82b';
       ctx.fillRect(x, y, CELL, CELL);
       ctx.fillStyle='#f0cf5c';
       ctx.fillRect(x+2, y+2, CELL-4, CELL-4);
     } else {
-      // Pfad – heller Sandboden mit Punkt-Textur
       ctx.fillStyle='#c9b582';
       ctx.fillRect(x, y, CELL, CELL);
       ctx.fillStyle='#b39962';
-      // Random-ish dots based on position
       const seed=(r*31+c*17)%4;
       for (let i=0; i<2; i++) {
         const dx=((seed*7+i*11)%(CELL-6))+3;
@@ -772,7 +869,6 @@ function drawLab() {
 
   ctx.textAlign='center'; ctx.textBaseline='middle';
 
-  // Goal star (drawn as gold star sprite at goal cell)
   const gx=27*CELL+CELL/2, gy=17*CELL+CELL/2;
   ctx.save();
   ctx.translate(gx, gy);
@@ -786,72 +882,81 @@ function drawLab() {
     if (i===0) ctx.moveTo(px,py); else ctx.lineTo(px,py);
   }
   ctx.closePath(); ctx.fill(); ctx.stroke();
-  // Glow
   ctx.shadowColor='#f0cf5c'; ctx.shadowBlur=15;
   ctx.fill();
   ctx.restore();
 
-  // Potion
   if (potionOnMap) {
     const px=POTION_POS.col*CELL+CELL/2, py=POTION_POS.row*CELL+CELL/2;
     ctx.save();
     ctx.translate(px, py+Math.sin(walkPhase*0.5)*1.5);
-    // Korken
     ctx.fillStyle='#6b513b'; ctx.strokeStyle='#1d1208'; ctx.lineWidth=1;
     ctx.fillRect(-3, -CELL*0.35, 6, 4);
     ctx.strokeRect(-3, -CELL*0.35, 6, 4);
-    // Hals
     ctx.fillStyle='#a8d4e8';
     ctx.fillRect(-2, -CELL*0.3, 4, 5);
     ctx.strokeRect(-2, -CELL*0.3, 4, 5);
-    // Bauch
     ctx.fillStyle='#7ba8cf';
     ctx.beginPath();
     ctx.ellipse(0, 2, CELL*0.22, CELL*0.27, 0, 0, Math.PI*2);
     ctx.fill(); ctx.stroke();
-    // Highlight
     ctx.fillStyle='rgba(255,255,255,0.5)';
     ctx.beginPath(); ctx.ellipse(-3, 0, 1.5, 4, 0, 0, Math.PI*2); ctx.fill();
     ctx.restore();
   }
 
-  // Guards
   for (const g of guards) {
     const x=g.col*CELL+CELL/2, y=g.row*CELL+CELL/2;
     drawGuard(ctx, x, y, CELL*1.2, walkPhase);
   }
 
-  // Player
   const px=player.col*CELL+CELL/2, py=player.row*CELL+CELL/2;
   drawHero(ctx, px, py, CELL*1.3, walkPhase);
 }
 
 // ══════════════════════════════════════════════════════════════
 //  GUTSCHEIN
+//  EmailJS-Konfiguration:
+//  1. Konto erstellen auf https://www.emailjs.com/
+//  2. E-Mail-Dienst und Vorlage anlegen
+//  3. Die drei Konstanten unten ersetzen
 // ══════════════════════════════════════════════════════════════
+const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
+const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
+const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
+
 function initGutschein() {
-  // Animate the GB-counter from "early days" to today
-  const counter = document.getElementById('gb-counter');
-  if (!counter || counter.dataset.done) return;
-  counter.dataset.done='1';
-  const target = 12; // 100€ heute → ca 12 GB DDR5
-  let v = 0;
-  const start = performance.now();
-  function tick(t) {
-    const p = Math.min((t-start)/1500, 1);
-    v = target * (1 - Math.pow(1-p,3));
-    counter.textContent = v.toFixed(1) + ' GB';
-    if (p<1) requestAnimationFrame(tick);
-    else counter.textContent = target + ' GB';
+  const eingeloest = localStorage.getItem('jensix-ram-eingeloest');
+  if (eingeloest) {
+    document.getElementById('gutschein-normal').style.display = 'none';
+    document.getElementById('gutschein-eingeloest').style.display = 'block';
   }
-  requestAnimationFrame(tick);
+}
+
+function einloesenRam() {
+  // E-Mail senden via EmailJS (nur wenn konfiguriert)
+  if (typeof emailjs !== 'undefined' && EMAILJS_SERVICE_ID !== 'YOUR_SERVICE_ID') {
+    emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+      to_email: 'birk@mail.ch',
+      subject:  'Jensix hat den goldenen RAM eingelöst!',
+      message:  'Jensix hat den goldenen RAM eingelöst. Bitte den Gutscheinbetrag von 100 Gold-Sesterzen via PayPal an Jensix weiterleiten.',
+    }, EMAILJS_PUBLIC_KEY).catch(err => console.warn('EmailJS Fehler:', err));
+  }
+
+  // Status in localStorage speichern (geräte-persistent)
+  localStorage.setItem('jensix-ram-eingeloest', 'true');
+
+  // UI aktualisieren
+  document.getElementById('gutschein-normal').style.display = 'none';
+  document.getElementById('gutschein-eingeloest').style.display = 'block';
+  document.getElementById('gutschein-eingeloest').scrollIntoView({behavior:'smooth', block:'start'});
 }
 
 // ══════════════════════════════════════════════════════════════
 //  INTRO ANIMATION
 // ══════════════════════════════════════════════════════════════
 function runIntro() {
-  ['ip1','ip2','ip3','ip4','ip5','intro-btn'].forEach((id,i) => {
+  ['ip1','ip2','ip3','ip4','ip5','hero-cards-title','hero-cards','intro-btn'].forEach((id,i) => {
     setTimeout(() => {
       const el = document.getElementById(id);
       if (el) el.classList.add('revealed');
@@ -860,6 +965,13 @@ function runIntro() {
 }
 
 window.addEventListener('load', ()=>{
+  // Mobile-Warnung prüfen
+  const isMobile = window.innerWidth < 900 ||
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent);
+  if (isMobile) {
+    document.getElementById('mobile-warning').style.display = 'flex';
+  }
+
   document.getElementById('screen-intro').classList.add('active','visible');
   runIntro();
 });

@@ -921,9 +921,9 @@ function drawLab() {
 //  2. E-Mail-Dienst und Vorlage anlegen
 //  3. Die drei Konstanten unten ersetzen
 // ══════════════════════════════════════════════════════════════
-const EMAILJS_SERVICE_ID  = 'YOUR_SERVICE_ID';
-const EMAILJS_TEMPLATE_ID = 'YOUR_TEMPLATE_ID';
-const EMAILJS_PUBLIC_KEY  = 'YOUR_PUBLIC_KEY';
+const EMAILJS_SERVICE_ID  = 'service_f3dhmxa';
+const EMAILJS_TEMPLATE_ID = 'template_9vzxeom';
+const EMAILJS_PUBLIC_KEY  = 'Vsvj1lgoj-kcOEFEH';
 
 function initGutschein() {
   const eingeloest = localStorage.getItem('jensix-ram-eingeloest');
